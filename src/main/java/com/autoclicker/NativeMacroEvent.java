@@ -10,7 +10,9 @@ public class NativeMacroEvent implements Serializable {
         KEY_RELEASED,
         MOUSE_PRESSED,
         MOUSE_RELEASED,
-        MOUSE_MOVED
+        MOUSE_MOVED,
+        MOUSE_GLIDE,
+        WAIT
     }
 
     private EventType type;
@@ -19,14 +21,20 @@ public class NativeMacroEvent implements Serializable {
     private int y;
     private int button;
     private long delayFromPrevious;
+    private long executionDuration;
 
     public NativeMacroEvent(EventType type, int keyCode, int x, int y, int button, long delayFromPrevious) {
+        this(type, keyCode, x, y, button, delayFromPrevious, 0);
+    }
+
+    public NativeMacroEvent(EventType type, int keyCode, int x, int y, int button, long delayFromPrevious, long executionDuration) {
         this.type = type;
         this.keyCode = keyCode;
         this.x = x;
         this.y = y;
         this.button = button;
         this.delayFromPrevious = delayFromPrevious;
+        this.executionDuration = executionDuration;
     }
 
     public EventType getType() {
@@ -51,6 +59,38 @@ public class NativeMacroEvent implements Serializable {
 
     public long getDelayFromPrevious() {
         return delayFromPrevious;
+    }
+
+    public void setDelayFromPrevious(long delayFromPrevious) {
+        this.delayFromPrevious = delayFromPrevious;
+    }
+    
+    public void setX(int x) {
+        this.x = x;
+    }
+    
+    public void setY(int y) {
+        this.y = y;
+    }
+    
+    public void setKeyCode(int keyCode) {
+        this.keyCode = keyCode;
+    }
+    
+    public void setType(EventType type) {
+        this.type = type;
+    }
+    
+    public void setButton(int button) {
+        this.button = button;
+    }
+    
+    public long getExecutionDuration() {
+        return executionDuration;
+    }
+    
+    public void setExecutionDuration(long executionDuration) {
+        this.executionDuration = executionDuration;
     }
 
     @Override

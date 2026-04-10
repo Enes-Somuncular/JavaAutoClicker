@@ -20,6 +20,7 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
     private JButton btnStopRecord;
     private JButton btnPlay;
     private JButton btnStopPlay;
+    private JButton btnEdit;
     private JTextField txtLoopCount;
 
     public MacroGUI() {
@@ -74,7 +75,7 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
             updateButtonLabels();
         });
 
-        JPanel mainPanel = new JPanel(new GridLayout(6, 1, 10, 10));
+        JPanel mainPanel = new JPanel(new GridLayout(7, 1, 10, 10)); // Changed grid from 6 to 7
         mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         statusLabel = new JLabel("Durum: Bekleniyor...", SwingConstants.CENTER);
@@ -91,12 +92,14 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
         btnStopRecord = new JButton();
         btnPlay = new JButton();
         btnStopPlay = new JButton();
+        btnEdit = new JButton("Görsel Kur / Düzenle");
         updateButtonLabels();
 
         mainPanel.add(btnRecord);
         mainPanel.add(btnStopRecord);
         mainPanel.add(btnPlay);
         mainPanel.add(btnStopPlay);
+        mainPanel.add(btnEdit);
 
         add(mainPanel, BorderLayout.CENTER);
 
@@ -108,6 +111,13 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
         btnStopRecord.addActionListener(e -> stopRecording());
         btnPlay.addActionListener(e -> startPlaying());
         btnStopPlay.addActionListener(e -> stopPlaying());
+        btnEdit.addActionListener(e -> openEditor());
+    }
+    
+    private void openEditor() {
+        new MacroEditorDialog(this, recorder).setVisible(true);
+        int count = recorder.getRecordedEvents().size();
+        statusLabel.setText("Durum: Hazır (" + count + " olay)");
     }
 
     private void updateButtonLabels() {
@@ -150,6 +160,7 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
     private void startRecording() {
         btnRecord.setEnabled(false);
         btnPlay.setEnabled(false);
+        btnEdit.setEnabled(false);
         btnStopRecord.setEnabled(true);
         statusLabel.setText("Durum: Kaydediliyor...");
         recorder.startRecording();
@@ -160,6 +171,7 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
         btnRecord.setEnabled(true);
         btnStopRecord.setEnabled(false);
         btnPlay.setEnabled(true);
+        btnEdit.setEnabled(true);
         
         int count = recorder.getRecordedEvents().size();
         statusLabel.setText("Durum: Kayıt Tamam (" + count + " olay)");
@@ -182,6 +194,7 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
 
         btnRecord.setEnabled(false);
         btnPlay.setEnabled(false);
+        btnEdit.setEnabled(false);
         btnStopPlay.setEnabled(true);
         statusLabel.setText("Durum: Oynatılıyor...");
 
@@ -202,6 +215,7 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
                 }
                 btnRecord.setEnabled(true);
                 btnPlay.setEnabled(true);
+                btnEdit.setEnabled(true);
                 btnStopPlay.setEnabled(false);
             });
         }).start();
@@ -212,6 +226,7 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
         statusLabel.setText("Durum: Oynatma Durduruldu");
         btnRecord.setEnabled(true);
         btnPlay.setEnabled(true);
+        btnEdit.setEnabled(true);
         btnStopPlay.setEnabled(false);
     }
 

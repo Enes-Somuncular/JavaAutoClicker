@@ -39,7 +39,12 @@ public class MacroPlayer {
 
                         if (!isPlaying) break;
 
-                        executeEvent(event);
+                        try {
+                            executeEvent(event);
+                        } catch (InterruptedException ex) {
+                            Thread.currentThread().interrupt();
+                            break;
+                        }
                     }
                     if (!isPlaying) break;
                     // Add a small delay between loops to prevent freezing
@@ -65,9 +70,34 @@ public class MacroPlayer {
         return isPlaying;
     }
 
-    private void executeEvent(NativeMacroEvent event) {
+    private void executeEvent(NativeMacroEvent event) throws InterruptedException {
         try {
             switch (event.getType()) {
+                case WAIT:
+                    if(event.getExecutionDuration() > 0) {
+                        Thread.sleep(event.getExecutionDuration());
+                    }
+                    break;
+                case MOUSE_GLIDE:
+                    Point start = MouseInfo.getPointerInfo().getLocation();
+                    int endX = event.getX();
+                    int endY = event.getY();
+                    long dur = event.getExecutionDuration();
+                    if (dur <= 0) {
+                        robot.mouseMove(endX, endY);
+                    } else {
+                        int steps = (int) (dur / 10);
+                        if (steps <= 0) steps = 1;
+                        for (int i = 1; i <= steps; i++) {
+                            if (!isPlaying) break;
+                            double progress = (double) i / steps;
+                            int currX = (int) (start.x + (endX - start.x) * progress);
+                            int currY = (int) (start.y + (endY - start.y) * progress);
+                            robot.mouseMove(currX, currY);
+                            Thread.sleep(10);
+                        }
+                    }
+                    break;
                 case KEY_PRESSED:
                     int pressCode = mapRawCodeToAWT(event.getKeyCode());
                     if(pressCode > 0 && pressCode < 65536) {
@@ -92,9 +122,15 @@ public class MacroPlayer {
                     robot.mouseMove(event.getX(), event.getY());
                     break;
                 case MOUSE_PRESSED:
+                    if (event.getX() > -1 && event.getY() > -1) {
+                        robot.mouseMove(event.getX(), event.getY());
+                    }
                     robot.mousePress(getAwtMouseButton(event.getButton()));
                     break;
                 case MOUSE_RELEASED:
+                    if (event.getX() > -1 && event.getY() > -1) {
+                        robot.mouseMove(event.getX(), event.getY());
+                    }
                     robot.mouseRelease(getAwtMouseButton(event.getButton()));
                     break;
             }
