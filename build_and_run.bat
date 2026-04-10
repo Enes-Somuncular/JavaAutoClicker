@@ -9,9 +9,7 @@ if not exist lib\flatlaf-3.4.jar (
 
 if not exist target\classes mkdir target\classes
 
-dir /s /b src\*.java > sources.txt
-javac -cp "lib\jnativehook-2.2.2.jar;lib\flatlaf-3.4.jar" -d target\classes @sources.txt
-del sources.txt
+javac -cp "lib\jnativehook-2.2.2.jar;lib\flatlaf-3.4.jar" -d target\classes src\main\java\com\autoclicker\*.java
 
 echo Compilation complete. Starting JavaAutoClicker...
 java -cp "target\classes;lib\jnativehook-2.2.2.jar;lib\flatlaf-3.4.jar" com.autoclicker.Main

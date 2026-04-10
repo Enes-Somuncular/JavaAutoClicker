@@ -30,8 +30,7 @@ Tıpkı legoları birleştirir gibi makronuzu sıfırdan yaratabilir, sürükle-
 ### Windows 🪟
 1. Depoyu bilgisayarınıza indirin (ya da Clone'layın).
 2. Klasör içerisindeki **`build_and_run.bat`** dosyasına **iki kere tıklayın**. (Eksik bağımlılıkları çeker ve `target/classes` klasörüne temiz bir kurulum yapar).
-3. Sonraki açılışlarınızda direkt **`run.bat`** ile açabilirsiniz!
-
+3. Sonraki açılışlarınızda klasör içerisindeki **`JavaAutoClicker.exe`** dosyasına tıklayarak arkada siyah terminal konsolu bırakmadan, doğrudan profesyonel biçimde başlatabilirsiniz. (Dilerseniz yine `run.bat` seçeneğini de kullanabilirsiniz).
 ### macOS / Linux 🍎
 1. Terminalinizi klasör içerisinde açın.
 2. Yetkileri ayarlamak için `chmod +x build.sh run.sh` çalıştırın.

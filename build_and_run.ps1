@@ -10,9 +10,7 @@ if (!(Test-Path -Path "lib\flatlaf-3.4.jar")) {
 
 if (!(Test-Path -Path "target\classes")) { New-Item -ItemType Directory -Force -Path "target\classes" }
 
-Get-ChildItem -Path src -Filter *.java -Recurse | Select-Object -ExpandProperty FullName > sources.txt
-javac -cp "lib\jnativehook-2.2.2.jar;lib\flatlaf-3.4.jar" -d target\classes @sources.txt
-Remove-Item sources.txt
+javac -cp "lib\jnativehook-2.2.2.jar;lib\flatlaf-3.4.jar" -d target\classes src\main\java\com\autoclicker\*.java
 
 echo "Compilation complete. Starting JavaAutoClicker..."
 java -cp "target\classes;lib\jnativehook-2.2.2.jar;lib\flatlaf-3.4.jar" com.autoclicker.Main
