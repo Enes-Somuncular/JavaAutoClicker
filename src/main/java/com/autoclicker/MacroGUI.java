@@ -154,11 +154,11 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
     private void saveMacro() {
         List<NativeMacroEvent> events = recorder.getRecordedEvents();
         if (events.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Kaydedilecek bir makro yok!");
+            JOptionPane.showMessageDialog(null, "Kaydedilecek bir makro yok!");
             return;
         }
         JFileChooser fc = new JFileChooser();
-        if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+        if (fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
             File f = fc.getSelectedFile();
             try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f))) {
                 oos.writeObject(events);
@@ -166,14 +166,14 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
                 config.lastMacroPath = f.getAbsolutePath();
                 config.save();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Hata: " + ex.getMessage());
+                JOptionPane.showMessageDialog(null, "Hata: " + ex.getMessage());
             }
         }
     }
 
     private void loadMacro() {
         JFileChooser fc = new JFileChooser();
-        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+        if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
             loadMacroFromFile(fc.getSelectedFile(), true);
         }
     }

@@ -104,6 +104,7 @@ public class MacroEditorDialog extends JDialog {
         JPanel bottomToolbar = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton btnEditDelay = new JButton("Süreyi Düzenle");
         JButton btnPickPos = new JButton("📍 Konum Al (Mouse)");
+        JButton btnCopyRow = new JButton("📄 Satırı Kopyala");
         JButton btnSpeedUp = new JButton("Hızlandır (-50%)");
         JButton btnSlowDown = new JButton("Yavaşlat (+100%)");
         JButton btnDelete = new JButton("Seçiliyi Sil");
@@ -111,6 +112,7 @@ public class MacroEditorDialog extends JDialog {
         
         bottomToolbar.add(btnEditDelay);
         bottomToolbar.add(btnPickPos);
+        bottomToolbar.add(btnCopyRow);
         bottomToolbar.add(btnSpeedUp);
         bottomToolbar.add(btnSlowDown);
         bottomToolbar.add(btnDelete);
@@ -136,6 +138,7 @@ public class MacroEditorDialog extends JDialog {
         btnAddWait.addActionListener(e -> addWaitAction());
         btnAddQuickPressRelease.addActionListener(e -> addQuickPressReleaseAction());
         btnPickPos.addActionListener(e -> pickPositionForSelected());
+        btnCopyRow.addActionListener(e -> copySelected());
         btnEditDelay.addActionListener(e -> editSelectedDelay());
         btnSpeedUp.addActionListener(e -> multiplyDelays(0.5));
         btnSlowDown.addActionListener(e -> multiplyDelays(2.0));
@@ -450,6 +453,34 @@ public class MacroEditorDialog extends JDialog {
 
         com.github.kwhat.jnativehook.GlobalScreen.addNativeMouseListener(listener);
         com.github.kwhat.jnativehook.GlobalScreen.addNativeMouseMotionListener(listener);
+    }
+
+    private void copySelected() {
+        int[] rows = table.getSelectedRows();
+        if (rows.length == 0) {
+            JOptionPane.showMessageDialog(null, "Kopyalanacak satırları seçin.");
+            return;
+        }
+
+        // Seçili satırların event kopyalarını oluştur
+        List<NativeMacroEvent> copies = new ArrayList<>();
+        for (int r : rows) {
+            NativeMacroEvent orig = events.get(r);
+            copies.add(new NativeMacroEvent(
+                    orig.getType(), orig.getKeyCode(),
+                    orig.getX(), orig.getY(), orig.getButton(),
+                    orig.getDelayFromPrevious(), orig.getExecutionDuration()));
+        }
+
+        // Son seçili satırın hemen altına ekle
+        int insertAt = rows[rows.length - 1] + 1;
+        for (int i = 0; i < copies.size(); i++) {
+            events.add(insertAt + i, copies.get(i));
+        }
+
+        refreshTable();
+        // Yeni eklenen satırları seç
+        table.setRowSelectionInterval(insertAt, insertAt + copies.size() - 1);
     }
 
     private void editSelectedDelay() {
