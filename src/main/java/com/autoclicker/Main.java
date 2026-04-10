@@ -15,9 +15,6 @@ public class Main {
         logger.setUseParentHandlers(false);
 
         try {
-            // JNativeHook'un kendi thread'ini meşgul etmemesi için ayrı bir dispatcher kuruyoruz.
-            // Bu, Windows'ta "beyaz ekran" ve "donma" sorunlarını önler.
-            GlobalScreen.setEventDispatcher(new com.github.kwhat.jnativehook.dispatcher.DefaultEventDispatcher());
             GlobalScreen.registerNativeHook();
         } catch (NativeHookException ex) {
             System.err.println("There was a problem registering the native hook.");
