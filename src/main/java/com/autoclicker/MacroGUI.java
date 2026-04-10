@@ -169,40 +169,32 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
             JOptionPane.showMessageDialog(null, "Kaydedilecek bir makro yok!");
             return;
         }
-        // JNativeHook global hook JFileChooser ile çakışmayı önlemek için geçici kaldır
-        GlobalScreen.removeNativeMouseListener(recorder);
-        GlobalScreen.removeNativeMouseMotionListener(recorder);
-        try {
-            JFileChooser fc = new JFileChooser();
-            if (fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-                File f = fc.getSelectedFile();
-                try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f))) {
-                    oos.writeObject(events);
-                    statusLabel.setText("Durum: Makro kaydedildi!");
-                    config.lastMacroPath = f.getAbsolutePath();
-                    config.save();
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(null, "Hata: " + ex.getMessage());
-                }
-            }
-        } finally {
-            GlobalScreen.addNativeMouseListener(recorder);
-            GlobalScreen.addNativeMouseMotionListener(recorder);
+        // Native Windows dosya dialogu — Swing boyama sorunu yok
+        FileDialog fd = new FileDialog(this, "Makroyu Kaydet", FileDialog.SAVE);
+        fd.setFile("makro.dat");
+        fd.setVisible(true);
+        String dir = fd.getDirectory();
+        String file = fd.getFile();
+        if (dir == null || file == null) return; // İptal edildi
+        File f = new File(dir, file);
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f))) {
+            oos.writeObject(events);
+            statusLabel.setText("Durum: Makro kaydedildi!");
+            config.lastMacroPath = f.getAbsolutePath();
+            config.save();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Hata: " + ex.getMessage());
         }
     }
 
     private void loadMacro() {
-        GlobalScreen.removeNativeMouseListener(recorder);
-        GlobalScreen.removeNativeMouseMotionListener(recorder);
-        try {
-            JFileChooser fc = new JFileChooser();
-            if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                loadMacroFromFile(fc.getSelectedFile(), true);
-            }
-        } finally {
-            GlobalScreen.addNativeMouseListener(recorder);
-            GlobalScreen.addNativeMouseMotionListener(recorder);
-        }
+        // Native Windows dosya dialogu — Swing boyama sorunu yok
+        FileDialog fd = new FileDialog(this, "Makro Yükle", FileDialog.LOAD);
+        fd.setVisible(true);
+        String dir = fd.getDirectory();
+        String file = fd.getFile();
+        if (dir == null || file == null) return; // İptal edildi
+        loadMacroFromFile(new File(dir, file), true);
     }
     
     private void loadMacroFromFile(File file, boolean saveToConfig) {
