@@ -169,24 +169,39 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
             JOptionPane.showMessageDialog(null, "Kaydedilecek bir makro yok!");
             return;
         }
-        JFileChooser fc = new JFileChooser();
-        if (fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-            File f = fc.getSelectedFile();
-            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f))) {
-                oos.writeObject(events);
-                statusLabel.setText("Durum: Makro kaydedildi!");
-                config.lastMacroPath = f.getAbsolutePath();
-                config.save();
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null, "Hata: " + ex.getMessage());
+        // JNativeHook global hook JFileChooser ile çakışmayı önlemek için geçici kaldır
+        GlobalScreen.removeNativeMouseListener(recorder);
+        GlobalScreen.removeNativeMouseMotionListener(recorder);
+        try {
+            JFileChooser fc = new JFileChooser();
+            if (fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+                File f = fc.getSelectedFile();
+                try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f))) {
+                    oos.writeObject(events);
+                    statusLabel.setText("Durum: Makro kaydedildi!");
+                    config.lastMacroPath = f.getAbsolutePath();
+                    config.save();
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Hata: " + ex.getMessage());
+                }
             }
+        } finally {
+            GlobalScreen.addNativeMouseListener(recorder);
+            GlobalScreen.addNativeMouseMotionListener(recorder);
         }
     }
 
     private void loadMacro() {
-        JFileChooser fc = new JFileChooser();
-        if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-            loadMacroFromFile(fc.getSelectedFile(), true);
+        GlobalScreen.removeNativeMouseListener(recorder);
+        GlobalScreen.removeNativeMouseMotionListener(recorder);
+        try {
+            JFileChooser fc = new JFileChooser();
+            if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                loadMacroFromFile(fc.getSelectedFile(), true);
+            }
+        } finally {
+            GlobalScreen.addNativeMouseListener(recorder);
+            GlobalScreen.addNativeMouseMotionListener(recorder);
         }
     }
     
