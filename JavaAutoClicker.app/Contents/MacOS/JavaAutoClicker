@@ -1,0 +1,10 @@
+#!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../../.." && pwd )"
+cd "$DIR"
+
+# Ensure it's compiled before running
+if [ ! -d "lib" ] || [ ! -f "lib/jnativehook-2.2.2.jar" ] || [ ! -f "lib/flatlaf-3.4.jar" ] || [ -z "$(ls -A target/classes 2>/dev/null)" ] && [ -z "$(ls -A src/main/java/com/autoclicker/*.class 2>/dev/null)" ]; then
+    ./build.sh
+fi
+
+./run.sh > /tmp/javaautoclicker_mac_log.txt 2>&1
