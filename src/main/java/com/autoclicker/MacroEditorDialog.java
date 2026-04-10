@@ -128,6 +128,8 @@ public class MacroEditorDialog extends JDialog {
         bottomRow1.add(btnSlowDown);
 
         JPanel bottomRow2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
+        JButton btnSetBulkDelay = new JButton("⏱ Toplu Gecikme Ata");
+        bottomRow2.add(btnSetBulkDelay);
         bottomRow2.add(btnDelete);
         bottomRow2.add(btnClearAll);
 
@@ -158,6 +160,7 @@ public class MacroEditorDialog extends JDialog {
         btnAddMultiPressRelease.addActionListener(e -> addMultiPressReleaseAction());
         btnPickPos.addActionListener(e -> pickPositionForSelected());
         btnCopyRow.addActionListener(e -> copySelected());
+        btnSetBulkDelay.addActionListener(e -> setBulkDelay());
         btnEditDelay.addActionListener(e -> editSelectedDelay());
         btnSpeedUp.addActionListener(e -> multiplyDelays(0.5));
         btnSlowDown.addActionListener(e -> multiplyDelays(2.0));
@@ -600,6 +603,29 @@ public class MacroEditorDialog extends JDialog {
             table.setRowSelectionInterval(row, row);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Geçersiz değer!");
+        }
+    }
+
+    private void setBulkDelay() {
+        int[] rows = table.getSelectedRows();
+        if (rows.length == 0) {
+            JOptionPane.showMessageDialog(null, "Gecikme atanacak satırları seçin.");
+            return;
+        }
+        String label = rows.length == 1 ? "Satır #" + (rows[0] + 1) : rows.length + " satır";
+        String delayStr = JOptionPane.showInputDialog(null,
+                label + " için sabit gecikme değeri girin (ms):", "80");
+        if (delayStr == null) return;
+        try {
+            long newDelay = Long.parseLong(delayStr.trim());
+            for (int r : rows) {
+                events.get(r).setDelayFromPrevious(newDelay);
+            }
+            refreshTable();
+            // Seçimi koru
+            for (int r : rows) table.addRowSelectionInterval(r, r);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Geçersiz değer!");
         }
     }
 
