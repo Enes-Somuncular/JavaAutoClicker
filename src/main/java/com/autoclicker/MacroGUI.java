@@ -27,22 +27,13 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
         recorder = new MacroRecorder();
         player = new MacroPlayer();
 
-        // Register recorder to global screen
-        GlobalScreen.addNativeKeyListener(recorder);
-        GlobalScreen.addNativeMouseListener(recorder);
-        GlobalScreen.addNativeMouseMotionListener(recorder);
-
-        // Register GUI to global screen to catch hotkeys
+        // GUI her zaman hotkey dinler, ama recorder SADECE kayıt sırasında dinleyecek.
         GlobalScreen.addNativeKeyListener(this);
 
         initUI();
     }
 
     private void initUI() {
-        // JNativeHook ile Swing popup çakışmasını önle — menü ghosting fix
-        JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-        ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
-
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
@@ -212,7 +203,7 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
             }
             updateButtonLabels(); // Kayıt göstergesi güncelle
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Hata: " + ex.getMessage());
+            JOptionPane.showMessageDialog(null, "Hata: " + ex.getMessage());
         }
     }
 
@@ -232,11 +223,23 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
         btnEdit.setEnabled(false);
         updateButtonLabels();
         statusLabel.setText("Durum: Kaydediliyor...");
+
+        // Kayıt başladığında dinleyicileri bağla (Trafiği sadece burada açıyoruz)
+        GlobalScreen.addNativeKeyListener(recorder);
+        GlobalScreen.addNativeMouseListener(recorder);
+        GlobalScreen.addNativeMouseMotionListener(recorder);
+
         recorder.startRecording();
     }
 
     private void stopRecording() {
         recorder.stopRecording();
+
+        // Kayıt bittiğinde dinleyicileri ayır (Huzur ve performans için)
+        GlobalScreen.removeNativeKeyListener(recorder);
+        GlobalScreen.removeNativeMouseListener(recorder);
+        GlobalScreen.removeNativeMouseMotionListener(recorder);
+
         isRecordingState = false;
         btnTogglePlay.setEnabled(true);
         btnEdit.setEnabled(true);
