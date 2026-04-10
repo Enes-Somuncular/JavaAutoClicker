@@ -9,6 +9,10 @@ import java.util.logging.Logger;
 
 public class Main {
     public static void main(String[] args) {
+        // Ekran kartı hızlandırmasını kapat — Windows beyaz ekran sorunlarını çözer
+        System.setProperty("sun.java2d.d3d", "false");
+        System.setProperty("sun.java2d.noddraw", "true");
+
         // Disable JNativeHook logging to prevent console spam
         Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
         logger.setLevel(Level.OFF);

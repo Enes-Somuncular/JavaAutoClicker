@@ -76,12 +76,12 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
         mb.add(optionsMenu);
         setJMenuBar(mb);
 
-        miSave.addActionListener(e -> SwingUtilities.invokeLater(this::saveMacro));
-        miLoad.addActionListener(e -> SwingUtilities.invokeLater(this::loadMacro));
-        miSettings.addActionListener(e -> SwingUtilities.invokeLater(() -> {
+        miSave.addActionListener(e -> saveMacro());
+        miLoad.addActionListener(e -> loadMacro());
+        miSettings.addActionListener(e -> {
             new SettingsDialog(this, config).setVisible(true);
             updateButtonLabels();
-        }));
+        });
 
         JPanel mainPanel = new JPanel(new GridLayout(7, 1, 10, 10)); // Changed grid from 6 to 7
         mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
@@ -164,32 +164,28 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
             JOptionPane.showMessageDialog(null, "Kaydedilecek bir makro yok!");
             return;
         }
-        // Native Windows dosya dialogu — Swing boyama sorunu yok
-        FileDialog fd = new FileDialog(this, "Makroyu Kaydet", FileDialog.SAVE);
-        fd.setFile("makro.dat");
-        fd.setVisible(true);
-        String dir = fd.getDirectory();
-        String file = fd.getFile();
-        if (dir == null || file == null) return; // İptal edildi
-        File f = new File(dir, file);
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f))) {
-            oos.writeObject(events);
-            statusLabel.setText("Durum: Makro kaydedildi!");
-            config.lastMacroPath = f.getAbsolutePath();
-            config.save();
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, "Hata: " + ex.getMessage());
+        
+        // JFileChooser, FlatLaf temasıyla %100 uyumludur. parent=null pencereyi izole eder.
+        JFileChooser fc = new JFileChooser(".");
+        if (fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+            File f = fc.getSelectedFile();
+            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f))) {
+                oos.writeObject(events);
+                statusLabel.setText("Durum: Makro kaydedildi!");
+                config.lastMacroPath = f.getAbsolutePath();
+                config.save();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "Hata: " + ex.getMessage());
+            }
         }
     }
 
     private void loadMacro() {
-        // Native Windows dosya dialogu — Swing boyama sorunu yok
-        FileDialog fd = new FileDialog(this, "Makro Yükle", FileDialog.LOAD);
-        fd.setVisible(true);
-        String dir = fd.getDirectory();
-        String file = fd.getFile();
-        if (dir == null || file == null) return; // İptal edildi
-        loadMacroFromFile(new File(dir, file), true);
+        // JFileChooser, FlatLaf temasıyla %100 uyumludur. parent=null pencereyi izole eder.
+        JFileChooser fc = new JFileChooser(".");
+        if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+            loadMacroFromFile(fc.getSelectedFile(), true);
+        }
     }
     
     private void loadMacroFromFile(File file, boolean saveToConfig) {
