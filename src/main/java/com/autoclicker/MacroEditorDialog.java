@@ -26,7 +26,7 @@ public class MacroEditorDialog extends JDialog {
     }
 
     private void initUI() {
-        setSize(750, 500);
+        setSize(950, 550);
         setLocationRelativeTo(getParent());
         setLayout(new BorderLayout());
 
