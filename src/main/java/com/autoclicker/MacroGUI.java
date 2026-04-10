@@ -39,6 +39,10 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
     }
 
     private void initUI() {
+        // JNativeHook ile Swing popup çakışmasını önle — menü ghosting fix
+        JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+        ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
+
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
