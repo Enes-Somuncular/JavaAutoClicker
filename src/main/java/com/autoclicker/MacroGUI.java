@@ -147,13 +147,20 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
 
     private void updateButtonLabels() {
         boolean hasRecording = !recorder.getRecordedEvents().isEmpty();
-        String dot = hasRecording ? "🟢" : "🔴"; // Yeşil = kayıt var, Kırmızı = boş
-        btnToggleRecord.setText(isRecordingState
-                ? "🟡 Kaydı Durdur (" + NativeKeyEvent.getKeyText(config.hotkeyToggleRecord) + ")"
-                : dot + " Kaydet (" + NativeKeyEvent.getKeyText(config.hotkeyToggleRecord) + ")");
+        String recordKey = NativeKeyEvent.getKeyText(config.hotkeyToggleRecord);
+        String playKey   = NativeKeyEvent.getKeyText(config.hotkeyTogglePlay);
+
+        if (isRecordingState) {
+            btnToggleRecord.setText("<html><font color='#FFC400'>&#11044;</font> Kayd\u0131 Durdur (" + recordKey + ")</html>");
+        } else if (hasRecording) {
+            btnToggleRecord.setText("<html><font color='#22CC44'>&#11044;</font> Kaydet (" + recordKey + ")</html>");
+        } else {
+            btnToggleRecord.setText("<html><font color='#EE3333'>&#11044;</font> Kaydet (" + recordKey + ")</html>");
+        }
+
         btnTogglePlay.setText(player.isPlaying()
-                ? "Durdur (" + NativeKeyEvent.getKeyText(config.hotkeyTogglePlay) + ")"
-                : "Oynat (" + NativeKeyEvent.getKeyText(config.hotkeyTogglePlay) + ")");
+                ? "Durdur (" + playKey + ")"
+                : "Oynat (" + playKey + ")");
     }
 
     private void saveMacro() {
