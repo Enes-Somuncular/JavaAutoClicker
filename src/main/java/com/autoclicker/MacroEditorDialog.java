@@ -445,8 +445,6 @@ public class MacroEditorDialog extends JDialog {
                     event.setY(ny);
                     refreshTable();
                     table.setRowSelectionInterval(row, row);
-                    JOptionPane.showMessageDialog(null,
-                            "Koordinat güncellendi → X: " + nx + ", Y: " + ny);
                 });
             }
         };
