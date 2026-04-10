@@ -1,88 +1,72 @@
-# Java AutoClicker & Macro Recorder
+<h1 align="center">🤖 Mükemmel Java AutoClicker & Makro Düzenleyici (AI Yapımı)</h1>
 
-A lightweight, open-source Java application that lets you record and replay mouse movements, clicks, and keyboard inputs globally. Built with a modern dark UI and global input hooking.
+<p align="center">
+  <em>Uygulama baştan aşağıya, mimari kararlarından grafik arayüzüne kadar tamamen detaylarına kadar <strong>Yapay Zeka (Antigravity AI)</strong> tarafından kodlanmış ve geliştirilmiştir.</em>
+</p>
 
-## Features
+---
 
-- **Global Input Recording**: Captures mouse movements, clicks, and keystrokes even when the application is running in the background.
-- **Macro Playback**: Replay your recorded actions with customizable loop counts.
-- **Customizable Hotkeys**: Change the default hotkeys for Record, Stop, Play, and Stop Play directly from the Settings menu.
-- **Save & Load Macros**: Export your recorded macros to a file and load them anytime later.
-- **Modern Dark Theme**: Features a sleek dark UI powered by FlatLaf.
+## 🌟 Neden Bu Uygulama?
 
-## Prerequisites
+Piyasadaki klasik makro programlarının aksine; bu proje **sadece kayıt alıp oynatmaz**. Profesyonel kullanıcılar, oyuncular ve geliştiriciler için **"Görsel Kurucu (Visual Builder)"** sunar. 
 
-- **Java 11 or higher** installed on your system.
-- (Optional) **Maven** if you wish to build the fat JAR manually.
+Tıpkı legoları birleştirir gibi makronuzu sıfırdan yaratabilir, sürükle-bırak ile olayların yerini değiştirebilir, anlık farenin nerede olduğunu dert etmeden **"Teleport"** ya da **"Kayarak Git"** seçeneklerini kullanabilirsiniz!
 
-## Technologies Used
+### ✨ Öne Çıkan Özellikler
 
-- [JNativeHook 2.2.2](https://github.com/kwhat/jnativehook) - For listening to global keyboard and mouse events.
-- [FlatLaf 3.4](https://github.com/JFormDesigner/FlatLaf) - For the modern flat look and feel.
+- **🤖 Tamamen AI Tarafından Kodlandı:** Kusursuz temiz kod mimarisi, thread yönetimi ve arayüz yapısı.
+- **🧱 Atomik (Lego) Eylem Sistemi:** Farenin "tuşuna basılı tutması", "x saniye beklemesi", sonra "tuşu bırakması" gibi birbirinden tamamen bağımsız atomik komutlar tek tek sıralanıp mükemmel döngüler yaratılabilir.
+- **🎨 Görsel Kurucu (Excel Tarzı Tablo):** Makronuzu oluşturup satır içi düzenleme ile X ve Y koordinatlarına çift tıklayarak düzeltebilir, "Seçiliyi hızlandır" butonlarıyla detaylı rötuşlar yapabilirsiniz.
+- **🔄 Akıllı Döngü ve Canlı Sayaç:** Döngü Sayısına `-1` yazdığınızda siz durdurana kadar devam eder. Ayrıca durdurduğunuz an makronuzun arka planda başarıyla tamamladığı tur sayısını ekranda kalıcı olarak gösterir.
+- **💾 Kapanma Hafızası (Autosave):** Elektrik gitse de, programı hızla kapatsanız da son yazdığınız makro ve son döngü sayılarınız her zaman program başlatıldığında sizin için hazırdır! Tek tuşla **"Öncekini Kurtar"** diyerek anında geri yüklenebilir.
+- **🧊 Donanım Serbest Bırakıcı (Hardware Release):** Makro aniden durdurulduğunda cihaz tuşlarınızı (CTRL, SHIFT, Mouse Sağ/Sol) serbest bırakır. "Tuş takılı kaldı" korkusu olmadan güvenle makroyu durdurabilirsiniz!
+- **🌐 Çapraz Platform Mükemmelliği:** Aynı şekilde hem **Mac/Linux (.sh)** hem de **Windows (.bat)** ortamında derlenip sorunsuz çalışır!
 
-## How to Build and Run
 
-### Windows (Quick Start)
+---
 
-The project includes batch scripts for easy compilation and execution on Windows:
+## 🚀 Hızlı Başlangıç
 
-1. Double-click `build_and_run.bat` to automatically download the required dependencies (JNativeHook, FlatLaf), compile the Java files, and prepare the `lib` folder.
-2. After the first compilation, you can simply run `run.bat` to launch the application.
+### Windows 🪟
+1. Depoyu bilgisayarınıza indirin (ya da Clone'layın).
+2. Klasör içerisindeki **`build_and_run.bat`** dosyasına **iki kere tıklayın**. (Eksik bağımlılıkları çeker ve `target/classes` klasörüne temiz bir kurulum yapar).
+3. Sonraki açılışlarınızda direkt **`run.bat`** ile açabilirsiniz!
 
-### macOS / Linux (Quick Start)
+### macOS / Linux 🍎
+1. Terminalinizi klasör içerisinde açın.
+2. Yetkileri ayarlamak için `chmod +x build.sh run.sh` çalıştırın.
+3. Derlemek ve başlatmak için `./build.sh` komutunu çalıştırın. (Erişilebilirlik izni vermeyi unutmayın).
+4. İlerleyen açılışlarda anında `./run.sh` ile başlayabilirsiniz.
 
-The project includes shell scripts for easy compilation and execution on macOS and Linux:
+*(Not: Ortamınızda Java 11 ve üzeri yüklü olmalıdır)*
 
-1. Open a terminal in the project directory.
-2. Make the scripts executable: `chmod +x build.sh run.sh`
-3. Run `./build.sh` to automatically download dependencies and compile the source code.
-4. Run `./run.sh` to launch the application.
+---
 
-### Maven Build
+## ⌨️ Klavye Kısayolları (Tamamen Tek Tuş!)
 
-If you have Maven installed, you can build a standalone executable fat JAR:
+Ara yüz kalabalığı tamamen devreden çıkarılmış, Başlat ve Durdurma fonksiyonları akıllandırılarak "Tek Tuş (Toggle)" haline getirilmiştir:
 
-```bash
-mvn clean package
-```
+- **Kaydı Başlat / Durdur:** `F7`
+- **Makroyu Oynat / Durdur:** `F9`
 
-The executable JAR will be generated in the `target/` directory. Run it with:
+*Tüm bu kısayolları `Ayarlar > Kısayol Ayarları` menüsüne girerek istediğiniz klavye tuşuna veya harfine eşitleyebilirsiniz!*
 
-```bash
-java -jar target/JavaAutoClicker-1.0-SNAPSHOT.jar
-```
+---
 
-## Default Hotkeys
+## 🛠️ Görsel Kurucu İle Neler Yapılır?
 
-- **Record:** `F7`
-- **Stop Recording:** `F8`
-- **Play Macro:** `F9`
-- **Stop Playback:** `F10`
+- **Sadece Fareyi Oraya Kaydır:** Mouse'unuzu seçtiğiniz bir X / Y pikseline 2 saniye içerisinde (kayarak) gitmesini sağlayabilirsiniz.
+- **Bulunduğu Yere Tıkla:** Kamera açısının sapmasının istenmediği oyunlarda (Minecraft, vs.) makroya `-` koordinatlı tık verirseniz, fareyi ne tarafa çevirirseniz makronuz oraya doğru kazı yapar / saldırı yapar! Cihazı kilitlemez.
+- **Sürükle-Bırak:** Tablodaki verilerin sırası mı karıştı? Excel tablosunda olduğu gibi satırın solundan fareyle tutarak olayları zincirde istediğiniz yere çekebilirsiniz.
 
-*You can change these hotkeys at any time by going to `Ayarlar > Kısayol Ayarları` (Settings > Hotkey Settings).*
+---
 
-## Usage
+## 🔒 Güvenlik Uyarıları ve Hatalar (False / Positives)
+Uygulama `JNativeHook` adında global bir tuş dinleyicisi içerir. Makronuzu Minecraft'ta arka planda çalışırken bile durdurabilmeniz için klavyeyi derinden dinlemesi gerekir. 
+Eğer Windows Defender veya Antivirüsler bir uyarısı verirse, bu tamamen global dinleme sebebiyledir. Başka bir deyişle **yanlış alarmdır**. Depo tamamen açık kaynaklıdır ve arka planda asla veri transferi yapmaz.
 
-1. Open the application.
-2. Press the **Record** hotkey (default: `F7`) to start capturing inputs.
-3. Perform the actions you want to automate.
-4. Press the **Stop Recording** hotkey (default: `F8`).
-5. (Optional) Set the **Loop Count** (Tekrar Sayısı) for how many times you want the macro to repeat.
-6. Press the **Play** hotkey (default: `F9`) to execute the macro.
-7. To abort playback before it finishes, press **Stop Playback** (default: `F10`).
+**Mac Kullanıcıları İçin:** Çalıştırmak istediğiniz terminal yazılımının **Erişilebilirlik** izinleri olduğundan emin olun (Ayarlar -> Gizlilik ve Güvenlik -> Erişilebilirlik).
 
-## Note on Security / Antivirus
+---
 
-Because this application utilizes `JNativeHook` to globally hook keyboard and mouse inputs (which is strictly required for macro recording), your Antivirus software or Windows Defender might flag the executable or the library as a "Keylogger" (`Trojan:Win32/Wacatac` or similar heuristic detections). 
-This is a **false positive**. The source code is entirely open, and the application does not transmit any data externally.
-
-### macOS Accessibility Permissions
-
-On macOS, this application requires **Accessibility** permissions to record and simulate global mouse and keyboard events.
-1. When you first run the application, macOS may prompt you to grant Accessibility access.
-2. Go to **System Settings > Privacy & Security > Accessibility** and ensure your Terminal application (e.g., Terminal, iTerm2, or standard IDE) is enabled.
-3. If the application does not record inputs, you may need to add your terminal app manually to the Accessibility list and restart it.
-
-## License
-
-This project is open-source and available for personal and educational use.
+> 🎉 **Teşekkürler:** *"Bu uygulama insan isteklerinin sınırlarını aşan bir hız ve titizlikle Yapay Zeka tarafından oluşturulmuştur. Makrolayabileceğiniz sınır sadece hayal gücünüzdür!"*
