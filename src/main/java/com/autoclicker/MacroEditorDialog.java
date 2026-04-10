@@ -15,6 +15,7 @@ public class MacroEditorDialog extends JDialog {
     private final List<NativeMacroEvent> events;
     private JTable table;
     private DefaultTableModel tableModel;
+    private JScrollPane scrollPane;
 
     public MacroEditorDialog(JFrame parent, MacroRecorder recorder) {
         super(parent, "Makro Düzenleyici (Timeline & Kurucu)", true); // Modal
@@ -83,7 +84,7 @@ public class MacroEditorDialog extends JDialog {
         
         refreshTable();
 
-        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane = new JScrollPane(table);
         add(scrollPane, BorderLayout.CENTER);
 
         // Top toolbar (Adding actions)
@@ -481,16 +482,25 @@ public class MacroEditorDialog extends JDialog {
     }
 
     private void pickPositionForSelected() {
-        int row = table.getSelectedRow();
-        if (row == -1) {
-            JOptionPane.showMessageDialog(null, "Önce tabloda bir satır seçin, ardından bu butona basın.");
+        int[] selectedRows = table.getSelectedRows();
+        if (selectedRows.length == 0) {
+            JOptionPane.showMessageDialog(null, "Önce tabloda bir veya birden fazla satır seçin.");
             return;
         }
 
-        NativeMacroEvent event = events.get(row);
-        // Popup yerine başlık çubuğuna ipucu yaz — hiç tıklamaya gerek yok
+        // Görsel pick modu: scrollPane'e kalın turuncu çerçeve ekle
+        javax.swing.border.Border normalBorder = scrollPane.getBorder();
+        javax.swing.border.Border pickBorder = BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(220, 120, 0), 4),
+                BorderFactory.createEmptyBorder(2, 2, 2, 2));
+        scrollPane.setBorder(pickBorder);
+
+        // Başlık ipucu
         String originalTitle = getTitle();
-        setTitle("📍 Satır #" + (row + 1) + " için ekrana tıklayın...");
+        String rowsLabel = selectedRows.length == 1
+                ? "Satır #" + (selectedRows[0] + 1)
+                : selectedRows.length + " satır";
+        setTitle("📍 " + rowsLabel + " için ekrana tıklayın...");
 
         com.github.kwhat.jnativehook.mouse.NativeMouseInputListener listener =
                 new com.github.kwhat.jnativehook.mouse.NativeMouseInputListener() {
@@ -506,11 +516,21 @@ public class MacroEditorDialog extends JDialog {
                 int nx = e.getX();
                 int ny = e.getY();
                 SwingUtilities.invokeLater(() -> {
-                    event.setX(nx);
-                    event.setY(ny);
+                    // Tüm seçili satırlara aynı koordinatı uygula
+                    for (int r : selectedRows) {
+                        events.get(r).setX(nx);
+                        events.get(r).setY(ny);
+                    }
                     refreshTable();
-                    table.setRowSelectionInterval(row, row);
-                    setTitle(originalTitle); // Başlığı eski haline döndür
+                    // Seçimleri koru
+                    if (selectedRows.length == 1) {
+                        table.setRowSelectionInterval(selectedRows[0], selectedRows[0]);
+                    } else {
+                        for (int r : selectedRows) table.addRowSelectionInterval(r, r);
+                    }
+                    // Görseli sıfırla
+                    scrollPane.setBorder(normalBorder);
+                    setTitle(originalTitle);
                 });
             }
         };
