@@ -8,10 +8,10 @@ public class ConfigManager {
     private static final String CONFIG_FILE = "settings.properties";
     private Properties props = new Properties();
 
-    public int hotkeyRecord = NativeKeyEvent.VC_F7;
-    public int hotkeyStopRecord = NativeKeyEvent.VC_F8;
-    public int hotkeyPlay = NativeKeyEvent.VC_F9;
-    public int hotkeyStopPlay = NativeKeyEvent.VC_F10;
+    public int hotkeyToggleRecord = NativeKeyEvent.VC_F7;
+    public int hotkeyTogglePlay = NativeKeyEvent.VC_F9;
+    public int lastLoopCount = 1;
+    public String lastMacroPath = "";
 
     public ConfigManager() {
         load();
@@ -22,10 +22,10 @@ public class ConfigManager {
         if (f.exists()) {
             try (FileInputStream fis = new FileInputStream(f)) {
                 props.load(fis);
-                hotkeyRecord = Integer.parseInt(props.getProperty("hotkeyRecord", String.valueOf(NativeKeyEvent.VC_F7)));
-                hotkeyStopRecord = Integer.parseInt(props.getProperty("hotkeyStopRecord", String.valueOf(NativeKeyEvent.VC_F8)));
-                hotkeyPlay = Integer.parseInt(props.getProperty("hotkeyPlay", String.valueOf(NativeKeyEvent.VC_F9)));
-                hotkeyStopPlay = Integer.parseInt(props.getProperty("hotkeyStopPlay", String.valueOf(NativeKeyEvent.VC_F10)));
+                hotkeyToggleRecord = Integer.parseInt(props.getProperty("hotkeyToggleRecord", props.getProperty("hotkeyRecord", String.valueOf(NativeKeyEvent.VC_F7))));
+                hotkeyTogglePlay = Integer.parseInt(props.getProperty("hotkeyTogglePlay", props.getProperty("hotkeyPlay", String.valueOf(NativeKeyEvent.VC_F9))));
+                lastLoopCount = Integer.parseInt(props.getProperty("lastLoopCount", "1"));
+                lastMacroPath = props.getProperty("lastMacroPath", "");
             } catch (Exception e) {
                 System.err.println("Could not load config: " + e.getMessage());
             }
@@ -33,10 +33,10 @@ public class ConfigManager {
     }
 
     public void save() {
-        props.setProperty("hotkeyRecord", String.valueOf(hotkeyRecord));
-        props.setProperty("hotkeyStopRecord", String.valueOf(hotkeyStopRecord));
-        props.setProperty("hotkeyPlay", String.valueOf(hotkeyPlay));
-        props.setProperty("hotkeyStopPlay", String.valueOf(hotkeyStopPlay));
+        props.setProperty("hotkeyToggleRecord", String.valueOf(hotkeyToggleRecord));
+        props.setProperty("hotkeyTogglePlay", String.valueOf(hotkeyTogglePlay));
+        props.setProperty("lastLoopCount", String.valueOf(lastLoopCount));
+        props.setProperty("lastMacroPath", lastMacroPath);
         
         try (FileOutputStream fos = new FileOutputStream(CONFIG_FILE)) {
             props.store(fos, "Java AutoClicker Settings");
