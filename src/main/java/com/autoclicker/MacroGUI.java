@@ -253,12 +253,14 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
         btnToggleRecord.setEnabled(false);
         btnEdit.setEnabled(false);
         updateButtonLabels();
-        statusLabel.setText("Durum: Oynatılıyor...");
+
+        final int targetLoop = loopCount;
+        String suffix0 = (loopCount == -1) ? ")" : " / " + loopCount + ")";
+        statusLabel.setText("Durum: Oynatılıyor... (Tekrar: 0" + suffix0); // Anında sıfırla
 
         player.play(events, loopCount);
 
-        // Background thread to check when player finishes
-        final int targetLoop = loopCount;
+        // Arka plan izleyici: her yeni oynatma kendi sayacından başlar
         new Thread(() -> {
             while (player.isPlaying()) {
                 final int current = player.getCurrentLoopCount();
