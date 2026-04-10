@@ -93,12 +93,14 @@ public class MacroEditorDialog extends JDialog {
         JButton btnAddKey = new JButton("Yeni Tuş Ekle (Klavye)");
         JButton btnAddWait = new JButton("Sadece Bekleme Ekle");
         JButton btnAddQuickPressRelease = new JButton("Bas/Çek Ekle (Kısayol)");
+        JButton btnAddMultiPressRelease = new JButton("🔁 Çoklu Bas/Çek");
         
         topToolbar.add(btnAddVisual);
         topToolbar.add(btnAddInPlaceClick);
         topToolbar.add(btnAddKey);
         topToolbar.add(btnAddWait);
         topToolbar.add(btnAddQuickPressRelease);
+        topToolbar.add(btnAddMultiPressRelease);
         
         // Bottom toolbar (Editing actions)
         JPanel bottomToolbar = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -137,6 +139,7 @@ public class MacroEditorDialog extends JDialog {
         btnAddKey.addActionListener(e -> addKeyboardAction());
         btnAddWait.addActionListener(e -> addWaitAction());
         btnAddQuickPressRelease.addActionListener(e -> addQuickPressReleaseAction());
+        btnAddMultiPressRelease.addActionListener(e -> addMultiPressReleaseAction());
         btnPickPos.addActionListener(e -> pickPositionForSelected());
         btnCopyRow.addActionListener(e -> copySelected());
         btnEditDelay.addActionListener(e -> editSelectedDelay());
@@ -411,6 +414,68 @@ public class MacroEditorDialog extends JDialog {
         } else if (selection.equals(options[2])) { // Fare Sağ
             events.add(new NativeMacroEvent(NativeMacroEvent.EventType.MOUSE_PRESSED, 0, -1, -1, NativeMouseEvent.BUTTON2, delay));
             events.add(new NativeMacroEvent(NativeMacroEvent.EventType.MOUSE_RELEASED, 0, -1, -1, NativeMouseEvent.BUTTON2, 50));
+        }
+        refreshTable();
+    }
+
+    private void addMultiPressReleaseAction() {
+        String[] options = {"Klavye Tuşu", "Fare Sol Tık", "Fare Sağ Tık"};
+        Object selection = JOptionPane.showInputDialog(null,
+                "Neye çoklu (Bas + Çek) işlemi eklemek istiyorsunuz?",
+                "🔁 Çoklu Bas/Çek", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        if (selection == null) return;
+
+        // Gecikme (her bas öncesi)
+        long delay = 80;
+        String delayStr = JOptionPane.showInputDialog(null, "Her basma öncesi gecikme (ms):", "80");
+        if (delayStr == null) return;
+        try { delay = Long.parseLong(delayStr); } catch (Exception ignored) {}
+
+        // Bırakma gecikmesi
+        long releaseDelay = 50;
+        String relStr = JOptionPane.showInputDialog(null, "Bas ile Çek arasındaki gecikme (ms):", "50");
+        if (relStr == null) return;
+        try { releaseDelay = Long.parseLong(relStr); } catch (Exception ignored) {}
+
+        // Adet
+        int count = 1;
+        String countStr = JOptionPane.showInputDialog(null, "Kaç adet Bas/Çek eklensin?", "4");
+        if (countStr == null) return;
+        try { count = Integer.parseInt(countStr); } catch (Exception ignored) {}
+        if (count < 1) count = 1;
+
+        if (selection.equals(options[0])) { // Klavye
+            String inputStr = JOptionPane.showInputDialog(null, "Hangi tuş? (Örn: A, 1, ENTER, SPACE vb.):", "");
+            if (inputStr == null || inputStr.trim().isEmpty()) return;
+            String sel = inputStr.trim().toUpperCase();
+            int rawCode = 0;
+            switch (sel) {
+                case "ENTER": rawCode = 13; break;
+                case "SPACE": rawCode = 32; break;
+                case "SHIFT": rawCode = 160; break;
+                case "CTRL": rawCode = 162; break;
+                case "ALT": rawCode = 164; break;
+                case "BACKSPACE": rawCode = 8; break;
+                case "ESCAPE": rawCode = 27; break;
+                case "TAB": rawCode = 9; break;
+                default:
+                    if (sel.length() == 1) rawCode = (int) sel.charAt(0);
+                    else { JOptionPane.showMessageDialog(null, "Geçersiz tuş!"); return; }
+            }
+            for (int i = 0; i < count; i++) {
+                events.add(new NativeMacroEvent(NativeMacroEvent.EventType.KEY_PRESSED, rawCode, -1, -1, 0, delay));
+                events.add(new NativeMacroEvent(NativeMacroEvent.EventType.KEY_RELEASED, rawCode, -1, -1, 0, releaseDelay));
+            }
+        } else if (selection.equals(options[1])) { // Fare Sol
+            for (int i = 0; i < count; i++) {
+                events.add(new NativeMacroEvent(NativeMacroEvent.EventType.MOUSE_PRESSED, 0, -1, -1, NativeMouseEvent.BUTTON1, delay));
+                events.add(new NativeMacroEvent(NativeMacroEvent.EventType.MOUSE_RELEASED, 0, -1, -1, NativeMouseEvent.BUTTON1, releaseDelay));
+            }
+        } else if (selection.equals(options[2])) { // Fare Sağ
+            for (int i = 0; i < count; i++) {
+                events.add(new NativeMacroEvent(NativeMacroEvent.EventType.MOUSE_PRESSED, 0, -1, -1, NativeMouseEvent.BUTTON2, delay));
+                events.add(new NativeMacroEvent(NativeMacroEvent.EventType.MOUSE_RELEASED, 0, -1, -1, NativeMouseEvent.BUTTON2, releaseDelay));
+            }
         }
         refreshTable();
     }
