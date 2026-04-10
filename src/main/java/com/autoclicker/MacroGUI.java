@@ -149,7 +149,7 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
         boolean hasRecording = !recorder.getRecordedEvents().isEmpty();
         String dot = hasRecording ? "🟢" : "🔴"; // Yeşil = kayıt var, Kırmızı = boş
         btnToggleRecord.setText(isRecordingState
-                ? "Kaydı Durdur (" + NativeKeyEvent.getKeyText(config.hotkeyToggleRecord) + ")"
+                ? "🟡 Kaydı Durdur (" + NativeKeyEvent.getKeyText(config.hotkeyToggleRecord) + ")"
                 : dot + " Kaydet (" + NativeKeyEvent.getKeyText(config.hotkeyToggleRecord) + ")");
         btnTogglePlay.setText(player.isPlaying()
                 ? "Durdur (" + NativeKeyEvent.getKeyText(config.hotkeyTogglePlay) + ")"
