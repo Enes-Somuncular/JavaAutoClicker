@@ -133,6 +133,7 @@ public class MacroEditorDialog extends JDialog {
         btnAddKey.addActionListener(e -> addKeyboardAction());
         btnAddWait.addActionListener(e -> addWaitAction());
         btnAddQuickPressRelease.addActionListener(e -> addQuickPressReleaseAction());
+        btnAddQuickPressRelease.addActionListener(e -> addQuickPressReleaseAction());
         btnEditDelay.addActionListener(e -> editSelectedDelay());
         btnSpeedUp.addActionListener(e -> multiplyDelays(0.5));
         btnSlowDown.addActionListener(e -> multiplyDelays(2.0));
@@ -214,13 +215,13 @@ public class MacroEditorDialog extends JDialog {
             "Sağ Tuşu BIRAK (Release)",
             "Sadece Fareyi Oraya Götür / Kaydır (Move)"
         };
-        Object selection = JOptionPane.showInputDialog(this, 
+        Object selection = JOptionPane.showInputDialog(null, 
                 "Koordinat: (" + x + "," + y + ") | Ne yapılacak?", 
                 "Eylem Türü", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
         if (selection == null) return;
 
-        String delayStr = JOptionPane.showInputDialog(this, "Gecikme süresi (ms):", "80");
+        String delayStr = JOptionPane.showInputDialog(null, "Gecikme süresi (ms):", "80");
         if (delayStr == null) return;
 
         long delay = 80;
@@ -361,20 +362,20 @@ public class MacroEditorDialog extends JDialog {
 
     private void addQuickPressReleaseAction() {
         String[] options = {"Klavye Tuşu", "Fare Sol Tık", "Fare Sağ Tık"};
-        Object selection = JOptionPane.showInputDialog(this, 
+        Object selection = JOptionPane.showInputDialog(null, 
                 "Neye hızlı (Bas + Çek) işlemi eklemek istiyorsunuz?", 
                 "Bas/Çek Kısayol", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
         if (selection == null) return;
         
         long delay = 80;
-        String delayStr = JOptionPane.showInputDialog(this, "Bu işlemden önceki bekleme süresi (ms):", "80");
+        String delayStr = JOptionPane.showInputDialog(null, "Bu işlemden önceki bekleme süresi (ms):", "80");
         if (delayStr != null) {
             try { delay = Long.parseLong(delayStr); } catch (Exception ignored) {}
         }
         
         if (selection.equals(options[0])) { // Klavye
-            String inputStr = JOptionPane.showInputDialog(this, "Klavyeden bas/çek yapılacak tuşu yazın (Örn: A, 1, ENTER, SPACE vb.):", "");
+            String inputStr = JOptionPane.showInputDialog(null, "Klavyeden bas/çek yapılacak tuşu yazın (Örn: A, 1, ENTER, SPACE vb.):", "");
             if (inputStr == null || inputStr.trim().isEmpty()) return;
             
             String sel = inputStr.trim().toUpperCase();
@@ -392,7 +393,7 @@ public class MacroEditorDialog extends JDialog {
                     if (sel.length() == 1) {
                         rawCode = (int) sel.charAt(0);
                     } else {
-                        JOptionPane.showMessageDialog(this, "Geçersiz veya tanınmayan tuş metni!");
+                        JOptionPane.showMessageDialog(null, "Geçersiz veya tanınmayan tuş metni!");
                         return;
                     }
                     break;
