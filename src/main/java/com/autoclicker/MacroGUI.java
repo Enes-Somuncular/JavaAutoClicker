@@ -81,12 +81,12 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
         mb.add(optionsMenu);
         setJMenuBar(mb);
 
-        miSave.addActionListener(e -> saveMacro());
-        miLoad.addActionListener(e -> loadMacro());
-        miSettings.addActionListener(e -> {
+        miSave.addActionListener(e -> SwingUtilities.invokeLater(this::saveMacro));
+        miLoad.addActionListener(e -> SwingUtilities.invokeLater(this::loadMacro));
+        miSettings.addActionListener(e -> SwingUtilities.invokeLater(() -> {
             new SettingsDialog(this, config).setVisible(true);
             updateButtonLabels();
-        });
+        }));
 
         JPanel mainPanel = new JPanel(new GridLayout(7, 1, 10, 10)); // Changed grid from 6 to 7
         mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
