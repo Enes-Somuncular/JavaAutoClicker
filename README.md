@@ -29,6 +29,15 @@ The project includes batch scripts for easy compilation and execution on Windows
 1. Double-click `build_and_run.bat` to automatically download the required dependencies (JNativeHook, FlatLaf), compile the Java files, and prepare the `lib` folder.
 2. After the first compilation, you can simply run `run.bat` to launch the application.
 
+### macOS / Linux (Quick Start)
+
+The project includes shell scripts for easy compilation and execution on macOS and Linux:
+
+1. Open a terminal in the project directory.
+2. Make the scripts executable: `chmod +x build.sh run.sh`
+3. Run `./build.sh` to automatically download dependencies and compile the source code.
+4. Run `./run.sh` to launch the application.
+
 ### Maven Build
 
 If you have Maven installed, you can build a standalone executable fat JAR:
@@ -66,6 +75,13 @@ java -jar target/JavaAutoClicker-1.0-SNAPSHOT.jar
 
 Because this application utilizes `JNativeHook` to globally hook keyboard and mouse inputs (which is strictly required for macro recording), your Antivirus software or Windows Defender might flag the executable or the library as a "Keylogger" (`Trojan:Win32/Wacatac` or similar heuristic detections). 
 This is a **false positive**. The source code is entirely open, and the application does not transmit any data externally.
+
+### macOS Accessibility Permissions
+
+On macOS, this application requires **Accessibility** permissions to record and simulate global mouse and keyboard events.
+1. When you first run the application, macOS may prompt you to grant Accessibility access.
+2. Go to **System Settings > Privacy & Security > Accessibility** and ensure your Terminal application (e.g., Terminal, iTerm2, or standard IDE) is enabled.
+3. If the application does not record inputs, you may need to add your terminal app manually to the Accessibility list and restart it.
 
 ## License
 
