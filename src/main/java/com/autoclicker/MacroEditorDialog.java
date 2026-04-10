@@ -423,9 +423,9 @@ public class MacroEditorDialog extends JDialog {
         }
 
         NativeMacroEvent event = events.get(row);
-        JOptionPane.showMessageDialog(null,
-                "Tamam'a tıklayın, ardından koordinat almak istediğiniz ekran noktasına tıklayın.\n" +
-                "Seçili satır: #" + (row + 1) + " → X ve Y güncellenecek.");
+        // Popup yerine başlık çubuğuna ipucu yaz — hiç tıklamaya gerek yok
+        String originalTitle = getTitle();
+        setTitle("📍 Satır #" + (row + 1) + " için ekrana tıklayın...");
 
         com.github.kwhat.jnativehook.mouse.NativeMouseInputListener listener =
                 new com.github.kwhat.jnativehook.mouse.NativeMouseInputListener() {
@@ -445,6 +445,7 @@ public class MacroEditorDialog extends JDialog {
                     event.setY(ny);
                     refreshTable();
                     table.setRowSelectionInterval(row, row);
+                    setTitle(originalTitle); // Başlığı eski haline döndür
                 });
             }
         };
