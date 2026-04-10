@@ -81,20 +81,39 @@ public class MacroEditorDialog extends JDialog {
         table.setRowHeight(24); // Daha geniş satır — tıklaması kolay
         table.setFillsViewportHeight(true); // Boş alanda da tıklayabilmek için
 
-        table.setDragEnabled(true);
+        // DnD SADECE ilk sütundan (Sıra) başlatılır — diğer sütunlarda sürükle = seç
+        table.setDragEnabled(false);
         table.setDropMode(DropMode.INSERT_ROWS);
         table.setTransferHandler(new TableRowTransferHandler());
 
-        // Sürükleyerek seçim: basılı tut + sürükle ile çoklu satır seçimi
+        final int[] dragStartRow = {-1};
+        final int[] dragStartCol = {-1};
+
+        table.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent e) {
+                dragStartRow[0] = table.rowAtPoint(e.getPoint());
+                dragStartCol[0] = table.columnAtPoint(e.getPoint());
+            }
+        });
+
         table.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
             @Override
             public void mouseDragged(java.awt.event.MouseEvent e) {
+                int col = dragStartCol[0];
                 int row = table.rowAtPoint(e.getPoint());
-                if (row >= 0 && !e.isControlDown()) {
-                    int anchor = table.getSelectionModel().getAnchorSelectionIndex();
-                    if (anchor >= 0) {
-                        table.setRowSelectionInterval(
-                                Math.min(anchor, row), Math.max(anchor, row));
+
+                if (col == 0) {
+                    // İlk sütundan sürükle → satır taşıma (DnD)
+                    table.getTransferHandler().exportAsDrag(table, e, TransferHandler.MOVE);
+                } else {
+                    // Diğer sütunlardan sürükle → çoklu seçim
+                    if (row >= 0) {
+                        int anchor = table.getSelectionModel().getAnchorSelectionIndex();
+                        if (anchor >= 0) {
+                            table.setRowSelectionInterval(
+                                    Math.min(anchor, row), Math.max(anchor, row));
+                        }
                     }
                 }
             }
