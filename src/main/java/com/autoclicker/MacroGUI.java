@@ -142,13 +142,18 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
         new MacroEditorDialog(this, recorder).setVisible(true);
         int count = recorder.getRecordedEvents().size();
         statusLabel.setText("Durum: Hazır (" + count + " olay)");
+        updateButtonLabels(); // Kayıt göstergesi güncelle
     }
 
     private void updateButtonLabels() {
-        btnToggleRecord.setText(isRecordingState ? "Kaydı Durdur (" + NativeKeyEvent.getKeyText(config.hotkeyToggleRecord) + ")" 
-                                                 : "Kaydet (" + NativeKeyEvent.getKeyText(config.hotkeyToggleRecord) + ")");
-        btnTogglePlay.setText(player.isPlaying() ? "Durdur (" + NativeKeyEvent.getKeyText(config.hotkeyTogglePlay) + ")" 
-                                                 : "Oynat (" + NativeKeyEvent.getKeyText(config.hotkeyTogglePlay) + ")");
+        boolean hasRecording = !recorder.getRecordedEvents().isEmpty();
+        String dot = hasRecording ? "🟢" : "🔴"; // Yeşil = kayıt var, Kırmızı = boş
+        btnToggleRecord.setText(isRecordingState
+                ? "Kaydı Durdur (" + NativeKeyEvent.getKeyText(config.hotkeyToggleRecord) + ")"
+                : dot + " Kaydet (" + NativeKeyEvent.getKeyText(config.hotkeyToggleRecord) + ")");
+        btnTogglePlay.setText(player.isPlaying()
+                ? "Durdur (" + NativeKeyEvent.getKeyText(config.hotkeyTogglePlay) + ")"
+                : "Oynat (" + NativeKeyEvent.getKeyText(config.hotkeyTogglePlay) + ")");
     }
 
     private void saveMacro() {
@@ -187,12 +192,23 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
                 config.lastMacroPath = file.getAbsolutePath();
                 config.save();
             }
+            updateButtonLabels(); // Kayıt göstergesi güncelle
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Hata: " + ex.getMessage());
         }
     }
 
     private void startRecording() {
+        // Eğer mevcut kayıt varsa onay iste
+        if (!recorder.getRecordedEvents().isEmpty()) {
+            int choice = JOptionPane.showConfirmDialog(
+                    null,
+                    "Mevcut kayıt silinecek ve yeni kayıt başlayacak.\nÖnceki kaydınızı kaybedeceksiniz — emin misiniz?",
+                    "Kaydı Sıfırla?",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE);
+            if (choice != JOptionPane.YES_OPTION) return;
+        }
         isRecordingState = true;
         btnTogglePlay.setEnabled(false);
         btnEdit.setEnabled(false);
@@ -206,7 +222,7 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
         isRecordingState = false;
         btnTogglePlay.setEnabled(true);
         btnEdit.setEnabled(true);
-        updateButtonLabels();
+        updateButtonLabels(); // 🟢 göstergesi güncellenir
         
         int count = recorder.getRecordedEvents().size();
         statusLabel.setText("Durum: Kayıt Tamam (" + count + " olay)");
