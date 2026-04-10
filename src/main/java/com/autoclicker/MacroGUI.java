@@ -245,7 +245,7 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
     private void startPlaying() {
         List<NativeMacroEvent> events = recorder.getRecordedEvents();
         if (events.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Oynatılacak kaydedilmiş olay yok!");
+            JOptionPane.showMessageDialog(null, "Oynatılacak kaydedilmiş olay yok!");
             return;
         }
 
@@ -253,7 +253,7 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
         try {
             loopCount = Integer.parseInt(txtLoopCount.getText());
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Geçerli bir tekrar sayısı girin.");
+            JOptionPane.showMessageDialog(null, "Geçerli bir tekrar sayısı girin.");
             return;
         }
 
@@ -304,14 +304,17 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
 
     @Override
     public void nativeKeyPressed(NativeKeyEvent e) {
+        // JNativeHook kendi thread'inden çalışır — UI işlemlerini EDT'ye taşı
         int code = e.getKeyCode();
-        if (code == config.hotkeyToggleRecord && btnToggleRecord.isEnabled()) {
-            if (isRecordingState) stopRecording();
-            else startRecording();
-        } else if (code == config.hotkeyTogglePlay && btnTogglePlay.isEnabled()) {
-            if (player.isPlaying()) stopPlaying();
-            else startPlaying();
-        }
+        SwingUtilities.invokeLater(() -> {
+            if (code == config.hotkeyToggleRecord && btnToggleRecord.isEnabled()) {
+                if (isRecordingState) stopRecording();
+                else startRecording();
+            } else if (code == config.hotkeyTogglePlay && btnTogglePlay.isEnabled()) {
+                if (player.isPlaying()) stopPlaying();
+                else startPlaying();
+            }
+        });
     }
 
     @Override
