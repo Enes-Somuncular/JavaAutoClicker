@@ -78,14 +78,33 @@ public class MacroEditorDialog extends JDialog {
         table = new JTable(tableModel);
         table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         table.getColumnModel().getColumn(0).setMaxWidth(50);
-        
+        table.setRowHeight(24); // Daha geniş satır — tıklaması kolay
+        table.setFillsViewportHeight(true); // Boş alanda da tıklayabilmek için
+
         table.setDragEnabled(true);
         table.setDropMode(DropMode.INSERT_ROWS);
         table.setTransferHandler(new TableRowTransferHandler());
-        
+
+        // Sürükleyerek seçim: basılı tut + sürükle ile çoklu satır seçimi
+        table.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            @Override
+            public void mouseDragged(java.awt.event.MouseEvent e) {
+                int row = table.rowAtPoint(e.getPoint());
+                if (row >= 0 && !e.isControlDown()) {
+                    int anchor = table.getSelectionModel().getAnchorSelectionIndex();
+                    if (anchor >= 0) {
+                        table.setRowSelectionInterval(
+                                Math.min(anchor, row), Math.max(anchor, row));
+                    }
+                }
+            }
+        });
+
         refreshTable();
 
         scrollPane = new JScrollPane(table);
+        // Sol ve sağdan 10px boşluk — sürükleyerek seçim başlatmak için alan
+        scrollPane.setViewportBorder(BorderFactory.createEmptyBorder(2, 10, 2, 10));
         add(scrollPane, BorderLayout.CENTER);
 
         // Top toolbar — iki satıra bölündü
