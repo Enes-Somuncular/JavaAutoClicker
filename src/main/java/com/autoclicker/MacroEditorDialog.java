@@ -103,12 +103,14 @@ public class MacroEditorDialog extends JDialog {
         // Bottom toolbar (Editing actions)
         JPanel bottomToolbar = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton btnEditDelay = new JButton("Süreyi Düzenle");
+        JButton btnPickPos = new JButton("📍 Konum Al (Mouse)");
         JButton btnSpeedUp = new JButton("Hızlandır (-50%)");
         JButton btnSlowDown = new JButton("Yavaşlat (+100%)");
         JButton btnDelete = new JButton("Seçiliyi Sil");
         JButton btnClearAll = new JButton("Tümünü Temizle");
         
         bottomToolbar.add(btnEditDelay);
+        bottomToolbar.add(btnPickPos);
         bottomToolbar.add(btnSpeedUp);
         bottomToolbar.add(btnSlowDown);
         bottomToolbar.add(btnDelete);
@@ -133,7 +135,7 @@ public class MacroEditorDialog extends JDialog {
         btnAddKey.addActionListener(e -> addKeyboardAction());
         btnAddWait.addActionListener(e -> addWaitAction());
         btnAddQuickPressRelease.addActionListener(e -> addQuickPressReleaseAction());
-        btnAddQuickPressRelease.addActionListener(e -> addQuickPressReleaseAction());
+        btnPickPos.addActionListener(e -> pickPositionForSelected());
         btnEditDelay.addActionListener(e -> editSelectedDelay());
         btnSpeedUp.addActionListener(e -> multiplyDelays(0.5));
         btnSlowDown.addActionListener(e -> multiplyDelays(2.0));
@@ -408,6 +410,46 @@ public class MacroEditorDialog extends JDialog {
             events.add(new NativeMacroEvent(NativeMacroEvent.EventType.MOUSE_RELEASED, 0, -1, -1, NativeMouseEvent.BUTTON2, 50));
         }
         refreshTable();
+    }
+
+    private void pickPositionForSelected() {
+        int row = table.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(null, "Önce tabloda bir satır seçin, ardından bu butona basın.");
+            return;
+        }
+
+        NativeMacroEvent event = events.get(row);
+        JOptionPane.showMessageDialog(null,
+                "Tamam'a tıklayın, ardından koordinat almak istediğiniz ekran noktasına tıklayın.\n" +
+                "Seçili satır: #" + (row + 1) + " → X ve Y güncellenecek.");
+
+        com.github.kwhat.jnativehook.mouse.NativeMouseInputListener listener =
+                new com.github.kwhat.jnativehook.mouse.NativeMouseInputListener() {
+            @Override public void nativeMouseClicked(NativeMouseEvent e) {}
+            @Override public void nativeMouseReleased(NativeMouseEvent e) {}
+            @Override public void nativeMouseMoved(NativeMouseEvent e) {}
+            @Override public void nativeMouseDragged(NativeMouseEvent e) {}
+
+            @Override
+            public void nativeMousePressed(NativeMouseEvent e) {
+                com.github.kwhat.jnativehook.GlobalScreen.removeNativeMouseListener(this);
+                com.github.kwhat.jnativehook.GlobalScreen.removeNativeMouseMotionListener(this);
+                int nx = e.getX();
+                int ny = e.getY();
+                SwingUtilities.invokeLater(() -> {
+                    event.setX(nx);
+                    event.setY(ny);
+                    refreshTable();
+                    table.setRowSelectionInterval(row, row);
+                    JOptionPane.showMessageDialog(null,
+                            "Koordinat güncellendi → X: " + nx + ", Y: " + ny);
+                });
+            }
+        };
+
+        com.github.kwhat.jnativehook.GlobalScreen.addNativeMouseListener(listener);
+        com.github.kwhat.jnativehook.GlobalScreen.addNativeMouseMotionListener(listener);
     }
 
     private void editSelectedDelay() {
