@@ -16,12 +16,11 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
     private final ConfigManager config = new ConfigManager();
 
     private JLabel statusLabel;
-    private JButton btnRecord;
-    private JButton btnStopRecord;
-    private JButton btnPlay;
-    private JButton btnStopPlay;
+    private JButton btnToggleRecord;
+    private JButton btnTogglePlay;
     private JButton btnEdit;
     private JTextField txtLoopCount;
+    private boolean isRecordingState = false;
 
     public MacroGUI() {
         super("Java AutoClicker & Macro");
@@ -40,7 +39,21 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
     }
 
     private void initUI() {
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                try {
+                    config.lastLoopCount = Integer.parseInt(txtLoopCount.getText());
+                } catch (Exception ignored) {}
+                config.save();
+                try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("autosave.dat"))) {
+                    oos.writeObject(recorder.getRecordedEvents());
+                } catch (Exception ignored) {}
+                System.exit(0);
+            }
+        });
+        
         setSize(450, 320); // slightly taller for menu
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -84,34 +97,45 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
 
         JPanel loopPanel = new JPanel(new FlowLayout());
         loopPanel.add(new JLabel("Tekrar Sayısı:"));
-        txtLoopCount = new JTextField("1", 5);
+        txtLoopCount = new JTextField(String.valueOf(config.lastLoopCount), 5);
         loopPanel.add(txtLoopCount);
         mainPanel.add(loopPanel);
 
-        btnRecord = new JButton();
-        btnStopRecord = new JButton();
-        btnPlay = new JButton();
-        btnStopPlay = new JButton();
+        btnToggleRecord = new JButton();
+        btnTogglePlay = new JButton();
+        
+        JPanel editPanel = new JPanel(new GridLayout(1, 2, 5, 0));
         btnEdit = new JButton("Görsel Kur / Düzenle");
+        JButton btnRestore = new JButton("Öncekini Kurtar");
+        editPanel.add(btnEdit);
+        editPanel.add(btnRestore);
+        
         updateButtonLabels();
 
-        mainPanel.add(btnRecord);
-        mainPanel.add(btnStopRecord);
-        mainPanel.add(btnPlay);
-        mainPanel.add(btnStopPlay);
-        mainPanel.add(btnEdit);
+        mainPanel.add(btnToggleRecord);
+        mainPanel.add(btnTogglePlay);
+        mainPanel.add(editPanel);
 
         add(mainPanel, BorderLayout.CENTER);
 
-        btnStopRecord.setEnabled(false);
-        btnStopPlay.setEnabled(false);
-
         // Events
-        btnRecord.addActionListener(e -> startRecording());
-        btnStopRecord.addActionListener(e -> stopRecording());
-        btnPlay.addActionListener(e -> startPlaying());
-        btnStopPlay.addActionListener(e -> stopPlaying());
+        btnToggleRecord.addActionListener(e -> {
+            if (isRecordingState) stopRecording();
+            else startRecording();
+        });
+        btnTogglePlay.addActionListener(e -> {
+            if (player.isPlaying()) stopPlaying();
+            else startPlaying();
+        });
         btnEdit.addActionListener(e -> openEditor());
+        btnRestore.addActionListener(e -> {
+            File f = new File("autosave.dat");
+            if (f.exists() && f.isFile()) {
+                loadMacroFromFile(f, false);
+            } else {
+                JOptionPane.showMessageDialog(this, "Kurtarılacak kaydedilmiş bir önceki makro bulunamadı!");
+            }
+        });
     }
     
     private void openEditor() {
@@ -121,10 +145,10 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
     }
 
     private void updateButtonLabels() {
-        btnRecord.setText("Kaydet (" + NativeKeyEvent.getKeyText(config.hotkeyRecord) + ")");
-        btnStopRecord.setText("Kaydı Durdur (" + NativeKeyEvent.getKeyText(config.hotkeyStopRecord) + ")");
-        btnPlay.setText("Oynat (" + NativeKeyEvent.getKeyText(config.hotkeyPlay) + ")");
-        btnStopPlay.setText("Durdur (" + NativeKeyEvent.getKeyText(config.hotkeyStopPlay) + ")");
+        btnToggleRecord.setText(isRecordingState ? "Kaydı Durdur (" + NativeKeyEvent.getKeyText(config.hotkeyToggleRecord) + ")" 
+                                                 : "Kaydet (" + NativeKeyEvent.getKeyText(config.hotkeyToggleRecord) + ")");
+        btnTogglePlay.setText(player.isPlaying() ? "Durdur (" + NativeKeyEvent.getKeyText(config.hotkeyTogglePlay) + ")" 
+                                                 : "Oynat (" + NativeKeyEvent.getKeyText(config.hotkeyTogglePlay) + ")");
     }
 
     private void saveMacro() {
@@ -135,9 +159,12 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
         }
         JFileChooser fc = new JFileChooser();
         if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fc.getSelectedFile()))) {
+            File f = fc.getSelectedFile();
+            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f))) {
                 oos.writeObject(events);
                 statusLabel.setText("Durum: Makro kaydedildi!");
+                config.lastMacroPath = f.getAbsolutePath();
+                config.save();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Hata: " + ex.getMessage());
             }
@@ -147,31 +174,39 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
     private void loadMacro() {
         JFileChooser fc = new JFileChooser();
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fc.getSelectedFile()))) {
-                List<NativeMacroEvent> events = (List<NativeMacroEvent>) ois.readObject();
-                recorder.setRecordedEvents(events);
-                statusLabel.setText("Durum: Makro yüklendi! (" + events.size() + " olay)");
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Hata: " + ex.getMessage());
+            loadMacroFromFile(fc.getSelectedFile(), true);
+        }
+    }
+    
+    private void loadMacroFromFile(File file, boolean saveToConfig) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+            List<NativeMacroEvent> events = (List<NativeMacroEvent>) ois.readObject();
+            recorder.setRecordedEvents(events);
+            statusLabel.setText("Durum: Makro yüklendi! (" + events.size() + " olay)");
+            if (saveToConfig) {
+                config.lastMacroPath = file.getAbsolutePath();
+                config.save();
             }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Hata: " + ex.getMessage());
         }
     }
 
     private void startRecording() {
-        btnRecord.setEnabled(false);
-        btnPlay.setEnabled(false);
+        isRecordingState = true;
+        btnTogglePlay.setEnabled(false);
         btnEdit.setEnabled(false);
-        btnStopRecord.setEnabled(true);
+        updateButtonLabels();
         statusLabel.setText("Durum: Kaydediliyor...");
         recorder.startRecording();
     }
 
     private void stopRecording() {
         recorder.stopRecording();
-        btnRecord.setEnabled(true);
-        btnStopRecord.setEnabled(false);
-        btnPlay.setEnabled(true);
+        isRecordingState = false;
+        btnTogglePlay.setEnabled(true);
         btnEdit.setEnabled(true);
+        updateButtonLabels();
         
         int count = recorder.getRecordedEvents().size();
         statusLabel.setText("Durum: Kayıt Tamam (" + count + " olay)");
@@ -192,55 +227,58 @@ public class MacroGUI extends JFrame implements NativeKeyListener {
             return;
         }
 
-        btnRecord.setEnabled(false);
-        btnPlay.setEnabled(false);
+        btnToggleRecord.setEnabled(false);
         btnEdit.setEnabled(false);
-        btnStopPlay.setEnabled(true);
+        updateButtonLabels();
         statusLabel.setText("Durum: Oynatılıyor...");
 
         player.play(events, loopCount);
 
         // Background thread to check when player finishes
+        final int targetLoop = loopCount;
         new Thread(() -> {
             while (player.isPlaying()) {
+                final int current = player.getCurrentLoopCount();
+                SwingUtilities.invokeLater(() -> {
+                    if (player.isPlaying()) {
+                        String suffix = (targetLoop == -1) ? ")" : " / " + targetLoop + ")";
+                        statusLabel.setText("Durum: Oynatılıyor... (Tekrar: " + current + suffix);
+                    }
+                });
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(100);
                 } catch (InterruptedException ex) {
                     break;
                 }
             }
             SwingUtilities.invokeLater(() -> {
-                if (statusLabel.getText().equals("Durum: Oynatılıyor...")) {
-                    statusLabel.setText("Durum: Oynatma Tamamlandı");
-                }
-                btnRecord.setEnabled(true);
-                btnPlay.setEnabled(true);
+                int lastLoop = player.getCurrentLoopCount();
+                statusLabel.setText("Durum: Durduruldu/Tamamlandı (Biten Tur Sayısı: " + lastLoop + ")");
+                btnToggleRecord.setEnabled(true);
                 btnEdit.setEnabled(true);
-                btnStopPlay.setEnabled(false);
+                updateButtonLabels();
             });
         }).start();
     }
 
     private void stopPlaying() {
         player.stop();
-        statusLabel.setText("Durum: Oynatma Durduruldu");
-        btnRecord.setEnabled(true);
-        btnPlay.setEnabled(true);
+        int lastLoop = player.getCurrentLoopCount();
+        statusLabel.setText("Durum: Durduruldu/Tamamlandı (Biten Tur Sayısı: " + lastLoop + ")");
+        btnToggleRecord.setEnabled(true);
         btnEdit.setEnabled(true);
-        btnStopPlay.setEnabled(false);
+        updateButtonLabels();
     }
 
     @Override
     public void nativeKeyPressed(NativeKeyEvent e) {
         int code = e.getKeyCode();
-        if (code == config.hotkeyRecord && btnRecord.isEnabled()) {
-            startRecording();
-        } else if (code == config.hotkeyStopRecord && btnStopRecord.isEnabled()) {
-            stopRecording();
-        } else if (code == config.hotkeyPlay && btnPlay.isEnabled()) {
-            startPlaying();
-        } else if (code == config.hotkeyStopPlay && btnStopPlay.isEnabled()) {
-            stopPlaying();
+        if (code == config.hotkeyToggleRecord && btnToggleRecord.isEnabled()) {
+            if (isRecordingState) stopRecording();
+            else startRecording();
+        } else if (code == config.hotkeyTogglePlay && btnTogglePlay.isEnabled()) {
+            if (player.isPlaying()) stopPlaying();
+            else startPlaying();
         }
     }
 

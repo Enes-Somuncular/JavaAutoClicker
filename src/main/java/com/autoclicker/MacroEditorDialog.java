@@ -104,11 +104,13 @@ public class MacroEditorDialog extends JDialog {
         JButton btnSpeedUp = new JButton("Hızlandır (-50%)");
         JButton btnSlowDown = new JButton("Yavaşlat (+100%)");
         JButton btnDelete = new JButton("Seçiliyi Sil");
+        JButton btnClearAll = new JButton("Tümünü Temizle");
         
         bottomToolbar.add(btnEditDelay);
         bottomToolbar.add(btnSpeedUp);
         bottomToolbar.add(btnSlowDown);
         bottomToolbar.add(btnDelete);
+        bottomToolbar.add(btnClearAll);
         
         JPanel savePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnSave = new JButton("Kaydet ve Kapat");
@@ -132,6 +134,12 @@ public class MacroEditorDialog extends JDialog {
         btnSpeedUp.addActionListener(e -> multiplyDelays(0.5));
         btnSlowDown.addActionListener(e -> multiplyDelays(2.0));
         btnDelete.addActionListener(e -> deleteSelected());
+        btnClearAll.addActionListener(e -> {
+            if (JOptionPane.showConfirmDialog(this, "Tablodaki listeyi tamamen silmek / temizlemek istediğinize emin misiniz?", "Tümünü Temizle", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                events.clear();
+                refreshTable();
+            }
+        });
         btnSave.addActionListener(e -> {
             recorder.setRecordedEvents(this.events);
             dispose();
@@ -200,11 +208,12 @@ public class MacroEditorDialog extends JDialog {
             "Sol Tuşa BAS (Press)", 
             "Sol Tuşu BIRAK (Release)", 
             "Sağ Tuşa BAS (Press)", 
-            "Sağ Tuşu BIRAK (Release)"
+            "Sağ Tuşu BIRAK (Release)",
+            "Sadece Fareyi Oraya Götür / Kaydır (Move)"
         };
         Object selection = JOptionPane.showInputDialog(this, 
                 "Koordinat: (" + x + "," + y + ") | Ne yapılacak?", 
-                "Bas/Çek", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+                "Eylem Türü", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
         if (selection == null) return;
 
@@ -219,7 +228,12 @@ public class MacroEditorDialog extends JDialog {
             return;
         }
 
-        if (selection.equals(options[0])) { // Only Press Left
+        if (selection.equals(options[4])) { // Move/Glide
+            String durStr = JOptionPane.showInputDialog(this, "Fare oraya kaç milisaniyede kaysın/gitsin?\n(0 yazarsanız anında ışınlanır):", "500");
+            long dur = 500;
+            try { dur = Long.parseLong(durStr); } catch(Exception ignored){}
+            events.add(new NativeMacroEvent(NativeMacroEvent.EventType.MOUSE_GLIDE, 0, x, y, 0, delay, dur));
+        } else if (selection.equals(options[0])) { // Only Press Left
             events.add(new NativeMacroEvent(NativeMacroEvent.EventType.MOUSE_PRESSED, 0, x, y, NativeMouseEvent.BUTTON1, delay));
         } else if (selection.equals(options[1])) { // Only Release Left
             events.add(new NativeMacroEvent(NativeMacroEvent.EventType.MOUSE_RELEASED, 0, x, y, NativeMouseEvent.BUTTON1, delay));

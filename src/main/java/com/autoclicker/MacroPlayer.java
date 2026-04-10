@@ -4,13 +4,18 @@ import com.github.kwhat.jnativehook.mouse.NativeMouseEvent;
 
 import java.awt.*;
 import java.awt.event.InputEvent;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MacroPlayer {
 
     private Robot robot;
     private volatile boolean isPlaying = false;
+    private volatile int currentLoopCount = 0;
     private Thread playerThread;
+    private final Set<Integer> pressedKeys = new HashSet<>();
+    private final Set<Integer> pressedButtons = new HashSet<>();
 
     public MacroPlayer() {
         try {
@@ -26,27 +31,31 @@ public class MacroPlayer {
         if (events == null || events.isEmpty()) return;
 
         isPlaying = true;
+        currentLoopCount = 0;
+        pressedKeys.clear();
+        pressedButtons.clear();
+
         playerThread = new Thread(() -> {
             try {
-                for (int loop = 0; loop < loopCount; loop++) {
+                int i = 0;
+                while (isPlaying && !Thread.currentThread().isInterrupted()) {
+                    if (loopCount != -1 && i >= loopCount) break;
+                    currentLoopCount = i + 1;
+
                     for (NativeMacroEvent event : events) {
-                        if (!isPlaying) break;
+                        if (!isPlaying || Thread.currentThread().isInterrupted()) break;
 
                         // Wait for the delay
                         if (event.getDelayFromPrevious() > 0) {
                             Thread.sleep(event.getDelayFromPrevious());
                         }
 
-                        if (!isPlaying) break;
+                        if (!isPlaying || Thread.currentThread().isInterrupted()) break;
 
-                        try {
-                            executeEvent(event);
-                        } catch (InterruptedException ex) {
-                            Thread.currentThread().interrupt();
-                            break;
-                        }
+                        executeEvent(event);
                     }
                     if (!isPlaying) break;
+                    i++;
                     // Add a small delay between loops to prevent freezing
                     Thread.sleep(100); 
                 }
@@ -54,6 +63,7 @@ public class MacroPlayer {
                 Thread.currentThread().interrupt();
             } finally {
                 isPlaying = false;
+                releaseAllHardware();
             }
         });
         playerThread.start();
@@ -64,10 +74,27 @@ public class MacroPlayer {
         if (playerThread != null) {
             playerThread.interrupt();
         }
+        releaseAllHardware();
     }
 
     public boolean isPlaying() {
         return isPlaying;
+    }
+    
+    public int getCurrentLoopCount() {
+        return currentLoopCount;
+    }
+    
+    private void releaseAllHardware() {
+        for (Integer key : pressedKeys) {
+            try { robot.keyRelease(key); } catch (Exception ignored) {}
+        }
+        pressedKeys.clear();
+
+        for (Integer btn : pressedButtons) {
+            try { robot.mouseRelease(btn); } catch (Exception ignored) {}
+        }
+        pressedButtons.clear();
     }
 
     private void executeEvent(NativeMacroEvent event) throws InterruptedException {
@@ -103,8 +130,9 @@ public class MacroPlayer {
                     if(pressCode > 0 && pressCode < 65536) {
                         try {
                             robot.keyPress(pressCode);
+                            pressedKeys.add(pressCode);
                         } catch(Exception ex) {
-                            System.err.println("Could not press key " + pressCode + " (raw " + event.getKeyCode() + ")");
+                            System.err.println("Could not press key");
                         }
                     }
                     break;
@@ -113,8 +141,9 @@ public class MacroPlayer {
                     if(releaseCode > 0 && releaseCode < 65536) {
                         try {
                             robot.keyRelease(releaseCode);
+                            pressedKeys.remove(releaseCode);
                         } catch(Exception ex) {
-                            System.err.println("Could not release key " + releaseCode + " (raw " + event.getKeyCode() + ")");
+                            System.err.println("Could not release key");
                         }
                     }
                     break;
@@ -125,13 +154,17 @@ public class MacroPlayer {
                     if (event.getX() > -1 && event.getY() > -1) {
                         robot.mouseMove(event.getX(), event.getY());
                     }
-                    robot.mousePress(getAwtMouseButton(event.getButton()));
+                    int pBtn = getAwtMouseButton(event.getButton());
+                    robot.mousePress(pBtn);
+                    pressedButtons.add(pBtn);
                     break;
                 case MOUSE_RELEASED:
                     if (event.getX() > -1 && event.getY() > -1) {
                         robot.mouseMove(event.getX(), event.getY());
                     }
-                    robot.mouseRelease(getAwtMouseButton(event.getButton()));
+                    int rBtn = getAwtMouseButton(event.getButton());
+                    robot.mouseRelease(rBtn);
+                    pressedButtons.remove(rBtn);
                     break;
             }
         } catch (IllegalArgumentException e) {
