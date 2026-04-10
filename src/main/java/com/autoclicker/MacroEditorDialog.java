@@ -27,7 +27,8 @@ public class MacroEditorDialog extends JDialog {
     }
 
     private void initUI() {
-        setSize(950, 550);
+        setSize(950, 580);
+        setMinimumSize(new Dimension(780, 480));
         setLocationRelativeTo(getParent());
         setLayout(new BorderLayout());
 
@@ -87,24 +88,30 @@ public class MacroEditorDialog extends JDialog {
         scrollPane = new JScrollPane(table);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Top toolbar (Adding actions)
-        JPanel topToolbar = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        // Top toolbar — iki satıra bölündü
         JButton btnAddVisual = new JButton("Yeni Tıklama Ekle (Nokta Seç)");
         JButton btnAddInPlaceClick = new JButton("Fare Konumuna Göre Tık Ekle");
         JButton btnAddKey = new JButton("Yeni Tuş Ekle (Klavye)");
         JButton btnAddWait = new JButton("Sadece Bekleme Ekle");
         JButton btnAddQuickPressRelease = new JButton("Bas/Çek Ekle (Kısayol)");
         JButton btnAddMultiPressRelease = new JButton("🔁 Çoklu Bas/Çek");
-        
-        topToolbar.add(btnAddVisual);
-        topToolbar.add(btnAddInPlaceClick);
-        topToolbar.add(btnAddKey);
-        topToolbar.add(btnAddWait);
-        topToolbar.add(btnAddQuickPressRelease);
-        topToolbar.add(btnAddMultiPressRelease);
-        
-        // Bottom toolbar (Editing actions)
-        JPanel bottomToolbar = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        JPanel topRow1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
+        topRow1.add(btnAddVisual);
+        topRow1.add(btnAddInPlaceClick);
+        topRow1.add(btnAddKey);
+
+        JPanel topRow2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
+        topRow2.add(btnAddWait);
+        topRow2.add(btnAddQuickPressRelease);
+        topRow2.add(btnAddMultiPressRelease);
+
+        JPanel topToolbar = new JPanel();
+        topToolbar.setLayout(new BoxLayout(topToolbar, BoxLayout.Y_AXIS));
+        topToolbar.add(topRow1);
+        topToolbar.add(topRow2);
+
+        // Bottom toolbar — iki satıra bölündü
         JButton btnEditDelay = new JButton("Süreyi Düzenle");
         JButton btnPickPos = new JButton("📍 Konum Al (Mouse)");
         JButton btnCopyRow = new JButton("📄 Satırı Kopyala");
@@ -112,15 +119,23 @@ public class MacroEditorDialog extends JDialog {
         JButton btnSlowDown = new JButton("Yavaşlat (+100%)");
         JButton btnDelete = new JButton("Seçiliyi Sil");
         JButton btnClearAll = new JButton("Tümünü Temizle");
-        
-        bottomToolbar.add(btnEditDelay);
-        bottomToolbar.add(btnPickPos);
-        bottomToolbar.add(btnCopyRow);
-        bottomToolbar.add(btnSpeedUp);
-        bottomToolbar.add(btnSlowDown);
-        bottomToolbar.add(btnDelete);
-        bottomToolbar.add(btnClearAll);
-        
+
+        JPanel bottomRow1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
+        bottomRow1.add(btnEditDelay);
+        bottomRow1.add(btnPickPos);
+        bottomRow1.add(btnCopyRow);
+        bottomRow1.add(btnSpeedUp);
+        bottomRow1.add(btnSlowDown);
+
+        JPanel bottomRow2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
+        bottomRow2.add(btnDelete);
+        bottomRow2.add(btnClearAll);
+
+        JPanel bottomToolbar = new JPanel();
+        bottomToolbar.setLayout(new BoxLayout(bottomToolbar, BoxLayout.Y_AXIS));
+        bottomToolbar.add(bottomRow1);
+        bottomToolbar.add(bottomRow2);
+
         JPanel savePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnSave = new JButton("Kaydet ve Kapat");
         btnSave.setBackground(new Color(60, 150, 60));
