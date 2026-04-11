@@ -1,3 +1,7 @@
 *.class
 target/
 .DS_Store
+autosave.dat
+settings.properties
+.vscode/
+out/
